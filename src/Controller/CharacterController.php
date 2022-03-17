@@ -30,7 +30,7 @@ class CharacterController extends AbstractController
         $this->serializer = $serializer;
     }
     /**
-     * @Route("character", name="add_character", methods={"POST"})
+     * @Route("characters", name="add_character", methods={"POST"})
      */
     public function add(ManagerRegistry $doctrine, Request $request): Response
     {
@@ -71,8 +71,7 @@ class CharacterController extends AbstractController
 	{
         try {
 		    $repository = $doctrine->getRepository(Character::class);
-            $data = json_decode($request->getContent(), false);
-            $array_data = empty($data) ? [] : get_object_vars($data);
+            $array_data = json_decode($request->getContent(), true);
 
             $page = empty($array_data['page']) ? 1: (int)$array_data['page'];
             $limit = empty($array_data['limit']) ? 2: (int)$array_data['limit'];
@@ -92,7 +91,7 @@ class CharacterController extends AbstractController
 	}
 
     /**
-     * @Route("character/{id}", name="get_one_character", methods={"GET"})
+     * @Route("characters/{id}", name="get_one_character", methods={"GET"})
      */
     public function getById(ManagerRegistry $doctrine, $id): Response
     {
@@ -114,7 +113,7 @@ class CharacterController extends AbstractController
     }
 
     /**
-     * @Route("character/{id}", name="update_character", methods={"PUT"})
+     * @Route("characters/{id}", name="update_character", methods={"PUT"})
      */
     public function updateCharacter(ManagerRegistry $doctrine, $id, Request $request): Response
     {
@@ -125,8 +124,7 @@ class CharacterController extends AbstractController
               throw $this->createNotFoundException('No news found for id ' . $id);
             }
 
-            $data = json_decode($request->getContent(), false);
-            $array_data = get_object_vars($data);
+            $array_data = (array)json_decode($request->getContent(), true);
             $character = $repository->update($character, $array_data);
             $hateoas = HateoasBuilder::create()->build();
             $json = $hateoas->serialize(['ok'=>true, 'data' => $character, 'msg' => 'Character Updated'], 'json');
@@ -142,7 +140,7 @@ class CharacterController extends AbstractController
     }
 
     /**
-     * @Route("character/{id}", name="delete_one_character", methods={"DELETE"})
+     * @Route("characters/{id}", name="delete_one_character", methods={"DELETE"})
      */
     public function deleteCharacter(ManagerRegistry $doctrine, Int $id): Response
     {
