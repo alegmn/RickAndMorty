@@ -8,6 +8,8 @@ services:
         POSTGRES_DB: ${DATABASE_NAME:-app}
         POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-ChangeMe}
         POSTGRES_USER: ${DATABASE_USER:-symfony}
+      ports:
+        - "5432:5432"
         #      volumes:
         #        - db-data:/var/lib/postgresql/data:rw
         #        # - ./docker/db/data:/var/lib/postgresql/data:rw
