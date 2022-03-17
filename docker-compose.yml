@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  ###> doctrine/doctrine-bundle ###
+    database:
+      image: postgres:${POSTGRES_VERSION:-13}-alpine
+      environment:
+        POSTGRES_DB: ${DATABASE_NAME:-app}
+        POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-ChangeMe}
+        POSTGRES_USER: ${DATABASE_USER:-symfony}
+        #      volumes:
+        #        - db-data:/var/lib/postgresql/data:rw
+        #        # - ./docker/db/data:/var/lib/postgresql/data:rw
+        #  ###< doctrine/doctrine-bundle ###
+        #  
+        #  volumes:
+        #  ###> doctrine/doctrine-bundle ###
+        #    db-data:
+        #  ###< doctrine/doctrine-bundle ###
+        #  #
+    php-fpm:
+      build:
+        context: ./docker/php-fpm
+      depends_on:
+        - database
+      environment:
+        - APP_ENV=${APP_ENV}
+        - APP_SECRET=${APP_SECRET}
+        - DATABASE_URL=${DATABASE_URL}
+      volumes:
+        - ./:/var/www:cached
+        - /var/www/var/cache
+        - ./docker/.logs/symfony:/var/www/var/log:cached
+
+    nginx:
+      build:
+        context: ./docker/nginx
+      volumes:
+        - ./:/var/www:cached
+        - /var/www/var
+        - /var/www/vendor
+        - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+        - ./docker/nginx/sites/:/etc/nginx/sites-available
+        - ./docker/nginx/conf.d/:/etc/nginx/conf.d
+        - ./docker/.logs/nginx:/var/log/nginx
+      depends_on:
+        - php-fpm
+      ports:
+        - "8000:80"
